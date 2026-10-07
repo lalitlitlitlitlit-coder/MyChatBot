@@ -10,18 +10,40 @@
   <main class="chat">
     <header class="chat-header">
       <h1>MyChatBot</h1>
-      <button id="clear" type="button">New chat</button>
+      <div class="chat-actions">
+        <select id="persona" aria-label="Who to talk to"></select>
+        <button id="clear" type="button">New chat</button>
+      </div>
     </header>
 
     <div id="messages" class="messages" aria-live="polite">
-      <p class="empty">Ask me anything to get started.</p>
     </div>
 
     <form id="composer" class="composer">
       <textarea id="input" rows="1" placeholder="Type a message..." autofocus required></textarea>
       <button id="send" type="submit">Send</button>
     </form>
+    <p id="note" class="note" hidden></p>
   </main>
+
+  <aside class="panel" aria-label="Request details">
+    <header class="panel-header">
+      <h2>Request details</h2>
+    </header>
+    <div class="panel-body">
+      <p id="panel-empty" class="panel-empty">Send a message to see the API request and its stats.</p>
+      <div id="panel-content" hidden>
+        <h3>Stats</h3>
+        <dl id="stats" class="kv"></dl>
+        <h3>Rate limits</h3>
+        <dl id="limits" class="kv"></dl>
+        <h3>Parameters</h3>
+        <dl id="params" class="kv"></dl>
+        <h3>Request body</h3>
+        <pre id="request-body"></pre>
+      </div>
+    </div>
+  </aside>
   <script src="app.js"></script>
 </body>
 </html>

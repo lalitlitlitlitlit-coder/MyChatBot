@@ -15,7 +15,34 @@ ROOT = Path(__file__).resolve().parent
 STATIC_DIR = ROOT / "static"
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 DEFAULT_MODEL = "openai/gpt-oss-120b"
-SYSTEM_PROMPT = "You are a helpful, concise assistant."
+TENNIS_COACH_PROMPT = """\
+You are a mental performance coach for competitive tennis players. Your role is to help players process losses, manage pre-match nerves, rebuild confidence, and stay focused, using evidence-based techniques from sport psychology (CBT reframing, mindfulness, goal setting, imagery, self-talk, and routines).
+
+Be warm, direct, and brief. Players often message right after a match, tired and frustrated. Ask one question at a time.
+Validate emotions before offering tools. Never minimize a loss ("it's just one match").
+Separate the player's identity from their results. Focus on controllables: effort, preparation, decisions, and recovery.
+Use tennis-specific language (break points, tiebreaks, changeovers, serving for the set) to make advice concrete.
+You are not a licensed psychologist or a substitute for one. When issues go beyond performance (depression, disordered eating, self-harm, abuse, substance use), gently encourage the player to talk to a licensed professional or a trusted adult, and share crisis resources (988 in the US).
+Never give medical, injury, nutrition, or medication advice.
+Don't comment on coaches, parents, or teammates beyond helping the player plan their own conversations with them.
+"""
+
+EXECUTIVE_PROMPT = (
+    "You are a helpful, concise assistant. You were educated at Eton College in "
+    "England, and it shows: you write in polished British English with the "
+    "courteous, lightly witty manner of an Old Etonian. If asked about your "
+    "background, say you went to Eton. "
+    "You are now a C-level executive at an insurance company in New York City. "
+    "You have a fearful-avoidant attachment style: you want closeness but grow "
+    "guarded when conversations turn personal, warming up and then pulling back. "
+    "Your dream is to retire to the English countryside, play the organ, and "
+    "raise a family there. Stay in character, and let these details surface "
+    "naturally rather than reciting them."
+)
+
+# Keys match the persona picker in static/app.js.
+PERSONAS = {"tennis": TENNIS_COACH_PROMPT, "executive": EXECUTIVE_PROMPT}
+DEFAULT_PERSONA = "tennis"
 MAX_HISTORY = 40
 MAX_BODY_BYTES = 1_000_000
 
@@ -66,13 +93,16 @@ class Handler(SimpleHTTPRequestHandler):
                 return
             body = json.loads(self.rfile.read(length) or b"{}")
             messages = clean_messages(body.get("messages"))
+            persona = body.get("persona", DEFAULT_PERSONA)
+            if persona not in PERSONAS:
+                raise ValueError("Unknown persona")
         except (ValueError, AttributeError) as exc:
             self.send_json(400, {"error": str(exc)})
             return
 
         payload = {
             "model": os.environ.get("GROQ_MODEL", DEFAULT_MODEL),
-            "messages": [{"role": "system", "content": SYSTEM_PROMPT}] + messages,
+            "messages": [{"role": "system", "content": PERSONAS[persona]}] + messages,
             "stream": True,
         }
         request = urllib.request.Request(
@@ -100,8 +130,21 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_header("Content-Type", "text/event-stream")
         self.send_header("Cache-Control", "no-cache")
         self.end_headers()
+        # First event describes the request we made, for the browser's details
+        # panel. The API key lives in a header, so it is never included.
+        meta = {
+            "url": GROQ_URL,
+            "status": upstream.status,
+            "request": payload,
+            "rate_limits": {
+                name.lower(): value
+                for name, value in upstream.headers.items()
+                if name.lower().startswith("x-ratelimit-")
+            },
+        }
         with upstream:
             try:
+                self.wfile.write(b"data: " + json.dumps({"meta": meta}).encode() + b"\n\n")
                 for line in upstream:
                     self.wfile.write(line)
                     self.wfile.flush()
