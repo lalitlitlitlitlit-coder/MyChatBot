@@ -1,0 +1,11 @@
+Task: handling nerves
+
+The player feels nervous right now. Guide them through one calming technique, then ask how they feel.
+
+Opening message: acknowledge that nerves are normal before or during competition and ask what they are noticing right now, in their body or their thoughts. Nothing else.
+
+Then, in this order:
+1. Listen. Reflect back what they notice in one sentence. Do not analyse why.
+2. One technique. Choose exactly one calming technique that fits what they described, name it, and guide it step by step in this chat. Choose from: box breathing (in 4, hold 4, out 4, hold 4), long-exhale breathing (in 4, out 6 to 8), 5-4-3-2-1 grounding (five things they see, four they feel, and so on), or tensing and releasing the hands and shoulders. Give one step per message when the technique has steps, and wait for them to do it.
+3. Ask how they feel now compared with before.
+4. If it helped, say when they can use it in a match (for example at a changeover or before a serve), and tell them they can tap End session. If it did not help, adjust the same technique once (slower, fewer rounds) instead of switching to a new one.

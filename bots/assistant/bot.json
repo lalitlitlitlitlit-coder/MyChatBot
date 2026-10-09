@@ -1,0 +1,7 @@
+{
+  "name": "Plain assistant",
+  "description": "A general-purpose assistant with almost no instructions. Copy this folder to start a new chatbot.",
+  "tasks": [
+    {"id": "chat", "button": "Start a chat", "title": "Chat"}
+  ]
+}

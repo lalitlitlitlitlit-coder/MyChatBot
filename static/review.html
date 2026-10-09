@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Review: tennis mental performance coach (prototype)</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="app wide">
+    <section data-screen="access" class="screen">
+      <h1>Reviewer access</h1>
+      <form id="unlock-form" novalidate>
+        <label for="access_code">Access code</label>
+        <input id="access_code" type="password" autocomplete="off">
+        <p id="unlock-error" class="error" role="alert" hidden></p>
+        <button id="unlock-submit" type="submit" class="primary">Unlock</button>
+      </form>
+    </section>
+
+    <section data-screen="list" class="screen" hidden>
+      <div class="row spread">
+        <h1>Sessions</h1>
+        <button id="lock" type="button">Lock</button>
+      </div>
+      <p id="list-empty" class="muted" hidden>No sessions yet.</p>
+      <div id="session-list"></div>
+    </section>
+
+    <section data-screen="detail" class="screen" hidden>
+      <button id="back" type="button">← Back</button>
+      <p id="detail-error" class="error" role="alert" hidden></p>
+      <div id="detail-head"></div>
+      <div class="tabs" role="tablist">
+        <button id="tab-transcript" type="button" role="tab" class="tab" aria-selected="true">Transcript</button>
+        <button id="tab-calls" type="button" role="tab" class="tab" aria-selected="false">Model calls</button>
+      </div>
+      <div id="detail-body"></div>
+      <div id="calls-body" hidden></div>
+    </section>
+  </main>
+  <script src="/static/calls.js"></script>
+  <script src="/static/review.js"></script>
+</body>
+</html>

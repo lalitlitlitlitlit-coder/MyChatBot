@@ -3,47 +3,140 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MyChatBot</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Tennis mental performance coach (prototype)</title>
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <main class="chat">
-    <header class="chat-header">
-      <h1>MyChatBot</h1>
-      <div class="chat-actions">
-        <select id="persona" aria-label="Who to talk to"></select>
-        <button id="clear" type="button">New chat</button>
+  <main class="app">
+    <section data-screen="loading" class="screen centered">
+      <p class="muted">Loading…</p>
+    </section>
+
+    <section data-screen="fatal" class="screen centered" hidden>
+      <p id="fatal-text" class="error" role="alert"></p>
+    </section>
+
+    <section data-screen="notice" class="screen" hidden>
+      <h1>Before you start</h1>
+      <ul class="notice-list">
+        <li>This is a prototype for adult testers.</li>
+        <li>Use made-up scenarios.</li>
+        <li>Do not enter real personal information.</li>
+        <li>Your memory is saved in this browser only.</li>
+      </ul>
+      <button id="notice-ok" type="button" class="primary">I understand</button>
+    </section>
+
+    <section data-screen="onboarding" class="screen" hidden>
+      <h1>Set up your player</h1>
+      <p class="muted">You'll only be asked this once in this browser.</p>
+      <form id="profile-form" novalidate>
+        <label for="display_name">Display name</label>
+        <input id="display_name" name="display_name" type="text" maxlength="50" autocomplete="off">
+        <p class="field-error" data-error-for="display_name"></p>
+
+        <label for="age">Age</label>
+        <input id="age" name="age" type="text" inputmode="numeric" maxlength="2" autocomplete="off">
+        <p class="field-error" data-error-for="age"></p>
+
+        <label for="playing_level">Playing level</label>
+        <select id="playing_level" name="playing_level">
+          <option value="">Choose one…</option>
+          <option value="beginner">Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced</option>
+          <option value="national_junior">National junior</option>
+          <option value="international_junior">International junior</option>
+          <option value="college">College</option>
+          <option value="professional">Professional</option>
+        </select>
+        <p class="field-error" data-error-for="playing_level"></p>
+
+        <label for="pressure_points">Pressure points <span class="muted">(optional)</span></label>
+        <textarea id="pressure_points" name="pressure_points" rows="3" maxlength="500"
+          placeholder="Moments in a match where you feel the most pressure"></textarea>
+        <p class="field-error" data-error-for="pressure_points"></p>
+
+        <p id="profile-error" class="error" role="alert" hidden></p>
+        <button id="profile-submit" type="submit" class="primary">Save and continue</button>
+      </form>
+    </section>
+
+    <section data-screen="bots" class="screen" hidden>
+      <h1>Choose a chatbot</h1>
+      <p class="muted">Each one has its own instructions and its own memory.</p>
+      <p id="bots-empty" class="muted" hidden>No chatbots are set up yet.</p>
+      <div class="stack">
+        <button id="bots-resume" type="button" class="primary" hidden></button>
       </div>
-    </header>
+      <div id="bot-list" class="stack"></div>
+    </section>
 
-    <div id="messages" class="messages" aria-live="polite">
-    </div>
+    <section data-screen="home" class="screen" hidden>
+      <button id="home-back" type="button">← All chatbots</button>
+      <h1 id="home-title" style="margin-top: 16px"></h1>
+      <p id="home-greeting" class="muted"></p>
+      <p id="home-note" class="card" hidden></p>
+      <p id="home-error" class="error" role="alert" hidden></p>
+      <div class="stack">
+        <button id="resume" type="button" class="primary" hidden>Continue your open session</button>
+        <div id="task-list" class="stack" style="margin-top: 0"></div>
+        <button id="open-memory" type="button">What I remember</button>
+        <button id="home-inspector" type="button" class="link">Show inspector</button>
+      </div>
+    </section>
 
-    <form id="composer" class="composer">
-      <textarea id="input" rows="1" placeholder="Type a message..." autofocus required></textarea>
-      <button id="send" type="submit">Send</button>
-    </form>
-    <p id="note" class="note" hidden></p>
+    <section data-screen="memory" class="screen" hidden>
+      <button id="memory-back" type="button">← Home</button>
+      <h1 style="margin-top: 16px">What I remember</h1>
+      <p class="small muted">These short notes are what this chatbot uses from your past sessions with it. Deleting a note removes it from the chatbot's memory. Session transcripts are kept for review and are not deleted.</p>
+      <p class="small muted">Memory is tied to this browser. Clearing browser data or switching device starts fresh.</p>
+      <p id="memory-error" class="error" role="alert" hidden></p>
+      <p id="memory-empty" class="muted" hidden>Nothing remembered yet.</p>
+      <div id="memory-list"></div>
+      <button id="memory-delete-all" type="button" class="danger" style="margin-top: 16px" hidden>Delete all</button>
+    </section>
+
+    <section data-screen="chat" class="screen chat" hidden>
+      <header class="chat-header">
+        <h1 id="chat-title"></h1>
+        <div class="row">
+          <button id="inspector-toggle" type="button" aria-expanded="false" aria-controls="inspector">Inspector</button>
+          <button id="end-session" type="button">End session</button>
+        </div>
+      </header>
+      <div id="messages" class="messages" aria-live="polite"></div>
+      <p id="chat-status" class="chat-status small muted" hidden></p>
+      <p id="chat-retry" class="chat-status small error" role="alert" hidden>
+        <button id="retry" type="button" class="link">I couldn't reply just now. Tap to try again.</button>
+      </p>
+      <form id="composer" class="composer">
+        <textarea id="chat-input" rows="1" maxlength="2000" placeholder="Type a message…" aria-label="Message"></textarea>
+        <button id="send" type="submit" class="primary">Send</button>
+      </form>
+      <div id="chat-closed" class="chat-closed" hidden>
+        <p id="chat-closed-text" class="small muted"></p>
+        <button id="chat-home" type="button" class="primary">Back to Home</button>
+      </div>
+    </section>
   </main>
 
-  <aside class="panel" aria-label="Request details">
-    <header class="panel-header">
-      <h2>Request details</h2>
+  <aside id="inspector" class="inspector" aria-label="Inspector" hidden>
+    <div id="inspector-resizer" class="inspector-resizer" role="separator" aria-orientation="vertical"
+      aria-label="Resize inspector" tabindex="0" title="Drag to resize"></div>
+    <header class="chat-header">
+      <h1>Inspector</h1>
+      <button id="inspector-close" type="button">Close</button>
     </header>
-    <div class="panel-body">
-      <p id="panel-empty" class="panel-empty">Send a message to see the API request and its stats.</p>
-      <div id="panel-content" hidden>
-        <h3>Stats</h3>
-        <dl id="stats" class="kv"></dl>
-        <h3>Rate limits</h3>
-        <dl id="limits" class="kv"></dl>
-        <h3>Parameters</h3>
-        <dl id="params" class="kv"></dl>
-        <h3>Request body</h3>
-        <pre id="request-body"></pre>
-      </div>
+    <div class="inspector-body">
+      <p class="small muted">Every request sent to the model for this session, in order, with what came back.</p>
+      <p id="inspector-empty" class="small muted">Start a session to see its requests.</p>
+      <p id="inspector-total" class="tokens-total small" hidden></p>
+      <p id="inspector-error" class="small error" role="alert" hidden></p>
+      <div id="inspector-calls"></div>
     </div>
   </aside>
-  <script src="app.js"></script>
+  <script src="/static/calls.js"></script>
+  <script src="/static/app.js"></script>
 </body>
 </html>

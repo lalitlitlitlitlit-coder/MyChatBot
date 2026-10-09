@@ -1,0 +1,11 @@
+{
+  "name": "Tennis mental performance coach",
+  "description": "Post-loss debrief, pre-match focus routine, and handling nerves.",
+  "order": 1,
+  "player_profile": true,
+  "tasks": [
+    {"id": "post_loss", "button": "I just lost a match", "title": "Post-loss debrief", "result_label": "Your takeaway"},
+    {"id": "pre_match", "button": "Prepare for a match", "title": "Pre-match routine", "result_label": "Your routine"},
+    {"id": "nerves", "button": "I'm feeling nervous", "title": "Handling nerves", "result_label": "Technique you tried"}
+  ]
+}
